@@ -66,10 +66,10 @@ Em construção
 | Integrante                   | Perfil Git      | Papel / Reponsabilidade Projeto |
 |--------------------------|----------|----------|
 | Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)  | Documentação / Apresentação / Dashboards |
-| Igor Graseffi            | Em construção  | Definição do Tema / Storytelling / Pipeline Dados / Dashboard |
-| João Armandes             | Em construção  | Diagramas Arquitetura / Base de Dados / Dashboard |
-| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Dashboard |
-| Victor Lira            | Em construção  | Documentação / Vídeo Apresentação |
+| Igor Graseffi            | Em construção  | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard |
+| João Armandes             | Em construção  | Diagramas Arquitetura / Apresentação / Base de Dados / Dashboard |
+| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard |
+| Victor Lira            | Em construção  | Documentação / Apresentação / Vídeo Apresentação |
 
 
 ## Material de Apresentação
