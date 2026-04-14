@@ -38,7 +38,7 @@ Que combinações de features geram maior crescimento de inscritos em 60 dias?
 
 ## Diagrama base de dados
 
-![BaseDados](Images/Construcao_Pipeline_G7.png)
+![BaseDados](Images/BaseDados_G7.png)
 
 
 ## Execução do Pipeline
@@ -79,4 +79,7 @@ Em construção
 
 ## Glossário
 
-Em construção
+| Nome                   | Descrição |
+|--------------------------|----------|
+| PostgreSQL           | Sistema de gerenciamento de banco de dados relacional (SGBD) de código aberto, robusto e avançado, utilizado para armazenar, organizar e consultar dados com alta confiabilidade, suportando SQL padrão e recursos como transações, extensões e alta escalabilidade. |
+| PostgreSQL           | Sistema de gerenciamento de banco de dados relacional (SGBD) de código aberto, robusto e avançado, utilizado para armazenar, organizar e consultar dados com alta confiabilidade, suportando SQL padrão e recursos como transações, extensões e alta escalabilidade. |
