@@ -65,7 +65,7 @@ Em construção
 
 | Integrante                   | Perfil Git      | Papel / Reponsabilidade Projeto |
 |--------------------------|----------|----------|
-| Fernando Luiz            | (https://github.com/flg29-data)  | Em construção |
+| Fernando Luiz            | @flg29-data  | Em construção |
 | Igor Graseffi            | Em construção  | Em construção |
 | João Armandes             | Em construção  | Em construção |
 | Vitor Ribeiro            | Em construção  | Em construção |
