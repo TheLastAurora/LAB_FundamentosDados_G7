@@ -1,5 +1,6 @@
 # Projeto Final - Fundamentos Engenharia de Dados  
-**Tema:** Entretenimento - Agência de mídia - música 
+**Tema:** Entretenimento - Agência de mídia - música
+
 **Profº:** Wesley Lourenço Barbosa
 
 # Integrantes - Grupo 7
@@ -12,7 +13,7 @@
 
 ## Desafio do Projeto
 
-Construção de um pipeline ELT completo, avaliando a qualidade dos dados desde a ingestão (Raw), passando pela transformação (Silver/Gold) até a visualização.
+Construção de um pipeline ELT completo, avaliando a qualidade dos dados desde a ingestão (`Raw`), passando pela transformação (`Silver`/`Gold`) até a visualização.
 
 ## Storytelling
 
@@ -33,6 +34,11 @@ Que combinações de features geram maior crescimento de inscritos em 60 dias?
 ## Diagrama arquitetura
 
 ![Diagrama](Images/Construcao_Pipeline_G7.png)
+
+
+## Diagrama base de dados
+
+![BaseDados](Images/Construcao_Pipeline_G7.png)
 
 
 ## Execução do Pipeline
