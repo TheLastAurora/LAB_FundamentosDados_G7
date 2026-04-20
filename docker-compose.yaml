@@ -6,9 +6,9 @@ services:
     image: postgres:18
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-omdb}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./init:/docker-entrypoint-initdb.d
@@ -33,18 +33,18 @@ services:
         airflow db migrate
     environment: &airflow-env
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
       # Airflow 3.x Simple Auth Manager
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
-      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_USER:-admin}
-      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS: ${AIRFLOW_PASSWORD:-admin}
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_USER}
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS: ${AIRFLOW_PASSWORD}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
-      POSTGRES_DB: ${POSTGRES_DB:-omdb}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DATA_DIR: /opt/airflow/data/sample
       GE_REPORT_DIR: /opt/airflow/great_expectations/reports
     depends_on:
@@ -110,6 +110,14 @@ services:
     image: curlimages/curl:latest
     depends_on:
       - metabase
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      METABASE_USER: ${METABASE_USER}
+      METABASE_PASSWORD: ${METABASE_PASSWORD}
     restart: "no"
     entrypoint: /bin/sh
     command:
@@ -122,7 +130,6 @@ services:
         done
         echo "Metabase pronto! Verificando se já foi configurado..."
 
-        # Verifica se o setup já foi feito
         SETUP_TOKEN=$$(curl -sf http://metabase:3000/api/session/properties | grep -o '"setup-token":"[^"]*"' | cut -d'"' -f4)
 
         if [ -z "$$SETUP_TOKEN" ]; then
@@ -130,7 +137,7 @@ services:
           exit 0
         fi
 
-        echo "Configurando Metabase com setup-token..."
+        echo "1/2 - Criando usuário admin..."
         curl -sf -X POST http://metabase:3000/api/setup \
           -H "Content-Type: application/json" \
           -d "{
@@ -138,31 +145,40 @@ services:
             \"user\": {
               \"first_name\": \"Admin\",
               \"last_name\": \"OMDB\",
-              \"email\": \"admin@omdb.local\",
-              \"password\": \"Admin123!\"
-            },
-            \"database\": {
-              \"engine\": \"postgres\",
-              \"name\": \"OMDB Gold\",
-              \"details\": {
-                \"host\": \"postgres\",
-                \"port\": 5432,
-                \"dbname\": \"${POSTGRES_DB:-omdb}\",
-                \"user\": \"${POSTGRES_USER:-postgres}\",
-                \"password\": \"${POSTGRES_PASSWORD:-postgres}\",
-                \"schema-filters-type\": \"inclusion\",
-                \"schema-filters-patterns\": \"gold\"
-              }
+              \"email\": \"$$METABASE_USER\",
+              \"password\": \"$$METABASE_PASSWORD\"
             },
             \"prefs\": {
               \"site_name\": \"OMDB - Grupo 7\"
             }
-          }"
+          }" > /dev/null
+
+        echo "2/2 - Adicionando conexão PostgreSQL (schema gold)..."
+        SESSION=$$(curl -sf -X POST http://metabase:3000/api/session \
+          -H "Content-Type: application/json" \
+          -d "{\"username\": \"$$METABASE_USER\", \"password\": \"$$METABASE_PASSWORD\"}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+
+        curl -sf -X POST http://metabase:3000/api/database \
+          -H "Content-Type: application/json" \
+          -H "X-Metabase-Session: $$SESSION" \
+          -d "{
+            \"engine\": \"postgres\",
+            \"name\": \"OMDB Gold\",
+            \"details\": {
+              \"host\": \"$$POSTGRES_HOST\",
+              \"port\": $$POSTGRES_PORT,
+              \"dbname\": \"$$POSTGRES_DB\",
+              \"user\": \"$$POSTGRES_USER\",
+              \"password\": \"$$POSTGRES_PASSWORD\",
+              \"schema-filters-type\": \"inclusion\",
+              \"schema-filters-patterns\": \"gold\"
+            }
+          }" > /dev/null
 
         echo ""
         echo "=== Metabase configurado! ==="
         echo "  URL: http://localhost:3000"
-        echo "  Login: ${METABASE_USER:-admin@omdb.local} / ${METABASE_PASSWORD:-Admin123!}"
+        echo "  Login: $$METABASE_USER / $$METABASE_PASSWORD"
         echo "  Banco: OMDB Gold (schema gold)"
 
 volumes:
