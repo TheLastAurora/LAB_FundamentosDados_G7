@@ -47,7 +47,53 @@ Que combinações de features geram maior crescimento de inscritos em 60 dias?
 
 ## Execução do Pipeline
 
-Em construção
+### Pré-requisitos
+
+- Docker e Docker Compose instalados
+- Git
+
+### Subir o ambiente
+
+```bash
+# 1. Clone o repositório
+git clone <repo-url> && cd LAB_FundamentosDados_G7
+
+# 2. Copie o arquivo de variáveis de ambiente
+cp .env.example .env
+
+# 3. Suba todos os serviços
+docker compose up -d --build
+
+# 4. Aguarde os containers ficarem healthy
+docker compose ps
+```
+
+### Serviços disponíveis
+
+| Serviço           | URL                        | Credenciais       |
+| ----------------- | -------------------------- | ----------------- |
+| Airflow UI        | http://localhost:8080      | admin / admin     |
+| Metabase          | http://localhost:3000      | (setup inicial)   |
+| PostgreSQL        | localhost:5432             | postgres/postgres |
+
+### Executar o pipeline
+
+1. Acesse o **Airflow** em http://localhost:8080
+2. Ative a DAG `omdb_pipeline`
+3. Dispare manualmente (Trigger DAG) ou aguarde a execução diária
+4. Acompanhe os logs de cada tarefa:
+   - `extract_load` → carrega CSVs para `raw`
+   - `validate_raw` → Great Expectations valida a raw
+   - `dbt_deps` → instala pacotes dbt
+   - `dbt_run` → transforma raw → silver → gold
+   - `dbt_test` → executa testes
+
+### Conectar o Metabase ao schema gold
+
+1. Acesse http://localhost:3000
+2. Configure a conexão PostgreSQL:
+   - Host: `postgres`, Porta: `5432`, DB: `omdb`, User: `postgres`, Pass: `postgres`
+3. Crie dashboards a partir das tabelas `gold.dim_artists`, `gold.dim_albums`, `gold.fact_tracks`
   
 
 ## Vídeo de apresentação
@@ -73,7 +119,7 @@ Em construção
 | Igor Graseffi            | Em construção  | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard |
 | João Armandes             | Em construção  | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard |
 | Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard |
-| Victor Lira            | Em construção  | Documentação / Apresentação / Vídeo Apresentação |
+| Victor Lira            | [@VicLira](https://github.com/VicLira)  | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Airflow |
 
 
 ## Material de Apresentação

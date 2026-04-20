@@ -1,6 +1,38 @@
+# Python
 *.py[codz]
 __pycache__/
+*.egg-info/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
 .pdm-python
+.venv/
+venv/
+
+# Environment
+.env
+
+# Backups (large files)
+backups/*.tar
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Great Expectations
+great_expectations/reports/
+great_expectations/uncommitted/
+
+# Airflow
+airflow/logs/
+
+# Metabase
+metabase/
+
+# Docker volumes
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db
