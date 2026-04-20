@@ -67,7 +67,7 @@ def load_table(
             )
             if enc:
                 kwargs["encoding"] = enc
-            reader = pd.read_csv(f, **kwargs) # type: ignore
+            reader = pd.read_csv(f, **kwargs)  # type: ignore
             with engine.begin() as conn:
                 for df in reader:
                     chunk_n += 1
@@ -125,5 +125,7 @@ def run_extraction() -> list[TableLoadResult]:
 
     total_rows = sum(r.rows_loaded for r in results)
     total_time = sum(r.elapsed_seconds for r in results)
-    log.info(f"EL raw complete | tables={len(results)} total_rows={total_rows} total_elapsed={total_time:.1f}s")
+    log.info(
+        f"Extraction Layer complete | tables={len(results)} total_rows={total_rows} total_elapsed={total_time:.1f}s"
+    )
     return results
