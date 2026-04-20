@@ -70,11 +70,11 @@ docker compose ps
 
 ### Serviços disponíveis
 
-| Serviço           | URL                        | Credenciais       |
-| ----------------- | -------------------------- | ----------------- |
-| Airflow UI        | http://localhost:8080      | admin / admin     |
-| Metabase          | http://localhost:3000      | (setup inicial)   |
-| PostgreSQL        | localhost:5432             | postgres/postgres |
+| Serviço           | URL                        | Credenciais                |
+| ----------------- | -------------------------- | -------------------------- |
+| Airflow UI        | http://localhost:8080      | admin / admin              |
+| Metabase          | http://localhost:3000      | admin@omdb.local / Admin123! |
+| PostgreSQL        | localhost:5432             | postgres / postgres        |
 
 ### Executar o pipeline
 
@@ -82,13 +82,16 @@ docker compose ps
 2. Ative a DAG `omdb_pipeline`
 3. Dispare manualmente (Trigger DAG) ou aguarde a execução diária
 4. Acompanhe os logs de cada tarefa:
-   - `extract_load` → carrega CSVs para `raw`
+   - `extract_load` → carrega litedb.tar para `raw`
    - `validate_raw` → Great Expectations valida a raw
    - `dbt_deps` → instala pacotes dbt
    - `dbt_run` → transforma raw → silver → gold
    - `dbt_test` → executa testes
 
 ### Conectar o Metabase ao schema gold
+
+O Metabase é configurado automaticamente ao subir os containers (via `metabase-setup`).  
+Caso precise reconfigurar manualmente:
 
 1. Acesse http://localhost:3000
 2. Configure a conexão PostgreSQL:

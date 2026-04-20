@@ -16,26 +16,41 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "psql -U postgres -d airflow -c 'SELECT 1' > /dev/null 2>&1"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+      start_period: 30s
 
   # ============================================================
   # Airflow - Inicialização (migra DB e cria usuário admin)
   # ============================================================
   airflow-init:
-    build: ./airflow
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
     entrypoint: /bin/bash
     command:
       - -c
       - |
-        airflow db migrate
+        echo "Aguardando PostgreSQL e executando db migrate (com retries)..."
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          echo "  Tentativa $$i de 10..."
+          airflow db migrate && break
+          echo "  Falhou, aguardando 10s..."
+          sleep 10
+        done
     environment: &airflow-env
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+      # Chaves compartilhadas entre api-server e scheduler (obrigatório no Airflow 3.x multi-container)
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
       # Airflow 3.x Simple Auth Manager
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_USER}
@@ -47,6 +62,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DATA_DIR: /opt/airflow/data/sample
       GE_REPORT_DIR: /opt/airflow/great_expectations/reports
+      TARGET_SCHEMA: raw
+      TAR_PATH: /opt/airflow/backups/litedb.tar
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,7 +73,9 @@ services:
   # No Airflow 3.x, 'api-server' substitui o antigo 'webserver'
   # ============================================================
   airflow-api-server:
-    build: ./airflow
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
     command: api-server
     environment: *airflow-env
     volumes: &airflow-volumes
@@ -65,6 +84,7 @@ services:
       - ./dbt:/opt/airflow/dbt
       - ./great_expectations:/opt/airflow/great_expectations
       - ./data:/opt/airflow/data
+      - ./backups:/opt/airflow/backups
     ports:
       - "8080:8080"
     depends_on:
@@ -76,7 +96,9 @@ services:
   # Airflow - Scheduler (executa as DAGs)
   # ============================================================
   airflow-scheduler:
-    build: ./airflow
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
     command: scheduler
     environment: *airflow-env
     volumes: *airflow-volumes
