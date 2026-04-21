@@ -1,0 +1,5 @@
+# Dependências base (infra)
+psycopg2-binary
+pandas
+dbt-postgres~=1.9
+great-expectations>=1.0

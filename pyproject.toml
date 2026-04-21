@@ -1,15 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "LAB_FundamentosDados_G7"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Pipeline ELT - OMDB (Grupo 7)"
 authors = [
     {name = "Vitor L. Ribeiro", email = "vitor.ribeiro.swe@gmail.com"},
 ]
-dependencies = []
-requires-python = "==3.12.*"
+dependencies = [
+    "pandas>=2.0",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "python-dotenv",
+]
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 
+[tool.setuptools.packages.find]
+include = ["extraction*"]
+
+[project.scripts]
+el-raw = "extraction.el_raw:run_extraction"
 
 [tool.pdm]
 distribution = false
