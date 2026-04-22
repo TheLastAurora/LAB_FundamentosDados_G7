@@ -2,41 +2,38 @@ import great_expectations as gx
 from sqlalchemy import create_engine
 
 # ==========================================
-# Conexão com Postgres (Docker network)
+# Conexão com Postgres
 # ==========================================
 connection_string = "postgresql+psycopg2://postgres:postgres@postgres:5432/airflow"
 
-engine = create_engine(connection_string)
-
 # ==========================================
-# Inicializa contexto GE
+# Inicializa contexto
 # ==========================================
 context = gx.get_context()
 
 # ==========================================
-# Cria datasource (se não existir)
+# Cria datasource (API nova)
 # ==========================================
 datasource_name = "postgres_datasource"
 
-if datasource_name not in [ds["name"] for ds in context.list_datasources()]:
-    context.sources.add_postgres(
-        name=datasource_name,
-        connection_string=connection_string,
-    )
+datasource = context.sources.add_or_update_postgres(
+    name=datasource_name,
+    connection_string=connection_string,
+)
 
 # ==========================================
-# Cria asset (tabela raw.artists como exemplo)
+# Cria asset (tabela raw.artists)
 # ==========================================
 table_name = "artists"
 
-asset = context.sources.get(datasource_name).add_table_asset(
+asset = datasource.add_table_asset(
     name=table_name,
     table_name=table_name,
     schema_name="raw",
 )
 
 # ==========================================
-# Batch request
+# Batch
 # ==========================================
 batch_request = asset.build_batch_request()
 
@@ -46,12 +43,10 @@ validator = context.get_validator(
 )
 
 # ==========================================
-# Expectations básicas
+# Expectations
 # ==========================================
 validator.expect_table_row_count_to_be_between(min_value=1)
-
 validator.expect_column_values_to_not_be_null("id")
-
 validator.expect_column_values_to_be_unique("id")
 
 # ==========================================
@@ -60,7 +55,7 @@ validator.expect_column_values_to_be_unique("id")
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # ==========================================
-# Roda validação
+# Executa validação
 # ==========================================
 results = validator.validate()
 
