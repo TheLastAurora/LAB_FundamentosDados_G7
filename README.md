@@ -30,10 +30,6 @@ Principais questionamentos (problema de negócio):
 
 ![Storytelling](Images/Storytelling_G7.png)
 
-## Configurações realizadas
-
-- DBT
-- Great Expectatios
 
 ## Diagrama arquitetura
 
@@ -98,34 +94,15 @@ Caso precise reconfigurar manualmente:
    - Host: `postgres`, Porta: `5432`, DB: `omdb`, User: `postgres`, Pass: `postgres`
 3. Crie dashboards a partir das tabelas `gold.dim_artists`, `gold.dim_albums`, `gold.fact_tracks`
   
+## Great Expectations
 
-## Vídeo de apresentação
-
-Inserir link vídeo
-
-## Dashboards
-
-Inserir dashboards
-
-## Desafios Encontrados
-
-Inserir desafio
-
-## Papéis e Responsabilidades
-
-Incluir tabela participantes do grupo (com papéis e responsabilidades)
-
-## Material de Apresentação
-
-Incluir PPT Apresentação do Projeto
-
-## Glossário
-
-Inserir glossário
 Em construção
 
+## DBT
 
-## Dashboards
+Em construção
+
+## Dashboards Metabase
 
 Dashboards em construção
 
@@ -133,6 +110,10 @@ Dashboards em construção
 ## Desafios Encontrados
 
 Em construção
+
+## Vídeo de apresentação
+
+Inserir link vídeo
 
 
 ## Papéis e Responsabilidades
