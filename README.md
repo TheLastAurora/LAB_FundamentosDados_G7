@@ -208,7 +208,108 @@ Os arquivos de backup (`.tar`) não são versionados no repositório devido ao t
 
 ## DBT
 
-Em construção
+A camada Gold foi desenvolvida com **dbt (data build tool)** para transformar dados brutos e tratados em modelos analíticos orientados ao negócio.  
+Neste projeto, o dbt é responsável por consolidar a camada analítica que responde às perguntas centrais da agência de mídia musical, com foco em performance de artistas, decay de playback, impacto de features e efetividade de conteúdo explícito.
+
+### Objetivo da Camada Gold
+
+A camada Gold tem como finalidade:
+
+- disponibilizar tabelas analíticas prontas para consumo no Metabase;
+- padronizar métricas de negócio;
+- abstrair regras analíticas complexas em modelos reutilizáveis;
+- aumentar a confiança dos dashboards por meio de testes e documentação.
+
+As principais tabelas analíticas consumidas no BI são:
+
+- `gold.dim_artists`
+- `gold.dim_albums`
+- `gold.fact_tracks`
+
+---
+
+### 1. Visão Geral dos Dados
+
+Na camada Gold, os dados deixam de representar somente entidades técnicas e passam a refletir uma visão de negócio voltada para marketing musical e performance em streaming.
+
+Essa camada permite analisar, por exemplo:
+
+- o decay médio de playback por tipo de conteúdo ao longo de 12 semanas;
+- a permanência ou ascensão de artistas e músicas ao longo de 2024;
+- o impacto de combinações de features no crescimento de inscritos;
+- o comportamento do conteúdo explícito conforme a base de inscritos evolui. 
+
+A proposta é transformar o modelo relacional da base em uma estrutura mais adequada para exploração analítica, com fatos e dimensões que simplificam o consumo por dashboards e relatórios executivos.
+
+---
+
+### 2. Criação de Data Marts
+
+A camada Gold foi estruturada no conceito de **Data Marts**, organizando os dados por assunto de negócio.
+
+#### `gold.dim_artists`
+Dimensão de artistas, utilizada para análises de relevância, popularidade, crescimento de inscritos e comparação entre artistas emergentes e consolidados.
+
+#### `gold.dim_albums`
+Dimensão de álbuns, útil para analisar recorrência de lançamentos, relação entre projetos e impacto de álbuns na performance das faixas.
+
+#### `gold.fact_tracks`
+Fato principal do projeto, reunindo métricas de desempenho das músicas, como volume de visualizações/playbacks, características do conteúdo e relacionamento com artistas e álbuns. Essa tabela é a base para responder às perguntas estratégicas do storytelling. :contentReference[oaicite:4]{index=4}
+
+Essa modelagem permite separar:
+
+- **dimensões**: entidades descritivas do negócio;
+- **fatos**: eventos e métricas quantitativas;
+- **regras analíticas**: lógica centralizada no dbt para reaproveitamento no Metabase.
+
+---
+
+### 3. Melhoria na Abstração
+
+Um dos principais ganhos do uso do dbt neste projeto é a melhoria na abstração analítica.
+
+Em vez de depender de consultas complexas diretamente no BI, as regras de negócio são centralizadas em modelos versionados e testáveis. Isso reduz duplicidade de lógica, melhora a rastreabilidade e facilita manutenção do pipeline.
+
+Na prática, a camada Gold entrega:
+
+- nomenclatura mais próxima do negócio;
+- reaproveitamento de modelos analíticos;
+- separação clara entre ingestão, tratamento e consumo;
+- maior governança sobre métricas estratégicas.
+
+Essa abordagem também facilita a evolução futura para métricas padronizadas, documentação automatizada e maior escalabilidade analítica.
+
+---
+
+### Testes no dbt
+
+Para aumentar a confiabilidade da camada Gold, foram definidos testes de integridade e qualidade diretamente nos modelos dbt.
+
+Os testes aplicados seguem três pilares:
+
+#### `not_null`
+Garante que colunas críticas não contenham valores nulos.
+
+Exemplos:
+- `artist_id` em `dim_artists`
+- `album_id` em `dim_albums`
+- `track_id`, `artist_id` e `album_id` em `fact_tracks`
+
+#### `unique`
+Garante unicidade em chaves de negócio ou chaves substitutas.
+
+Exemplos:
+- `artist_id` em `dim_artists`
+- `album_id` em `dim_albums`
+- `track_id` em `fact_tracks`
+
+#### `relationships`
+Garante integridade referencial entre fato e dimensões.
+
+Exemplos:
+- `fact_tracks.artist_id` deve existir em `dim_artists.artist_id`
+- `fact_tracks.album_id` deve existir em `dim_albums.album_id`
+
 
 ## Dashboards Metabase
 
