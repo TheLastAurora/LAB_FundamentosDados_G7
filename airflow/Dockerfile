@@ -9,3 +9,4 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 COPY --chown=airflow:airflow extraction/ /opt/airflow/extraction/
 COPY --chown=airflow:airflow pyproject.toml /opt/airflow/
 RUN pip install --no-cache-dir /opt/airflow/
+RUN pip install great_expectations==0.17.21

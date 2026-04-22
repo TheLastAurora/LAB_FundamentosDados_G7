@@ -1,6 +1,8 @@
+version: "3.9"
+
 services:
   # ============================================================
-  # PostgreSQL - Banco de dados principal (OMDB + Airflow)
+  # PostgreSQL
   # ============================================================
   postgres:
     image: postgres:18
@@ -12,18 +14,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./init:/docker-entrypoint-initdb.d
-      - ./backups:/backups
+      - ./backups:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "psql -U postgres -d airflow -c 'SELECT 1' > /dev/null 2>&1"]
+      test: ["CMD-SHELL", "psql -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 30s
 
   # ============================================================
-  # Airflow - Inicialização (migra DB e cria usuário admin)
+  # Airflow INIT (define anchors aqui!)
   # ============================================================
   airflow-init:
     build:
@@ -33,11 +35,10 @@ services:
     command:
       - -c
       - |
-        echo "Aguardando PostgreSQL e executando db migrate (com retries)..."
+        echo "Aguardando PostgreSQL..."
         for i in 1 2 3 4 5 6 7 8 9 10; do
-          echo "  Tentativa $$i de 10..."
           airflow db migrate && break
-          echo "  Falhou, aguardando 10s..."
+          echo "Tentativa $$i falhou, retry..."
           sleep 10
         done
     environment: &airflow-env
@@ -45,32 +46,32 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+      AIRFLOW__DAG_PROCESSOR__REFRESH_INTERVAL: "30"
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
-      # Chaves compartilhadas entre api-server e scheduler (obrigatório no Airflow 3.x multi-container)
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
       AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
       AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
-      # Airflow 3.x Simple Auth Manager
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_USER}
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS: ${AIRFLOW_PASSWORD}
+
       POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
       DATA_DIR: /opt/airflow/data/sample
       GE_REPORT_DIR: /opt/airflow/great_expectations/reports
       TARGET_SCHEMA: raw
       TAR_PATH: /opt/airflow/backups/litedb.tar
+
     depends_on:
       postgres:
         condition: service_healthy
 
   # ============================================================
-  # Airflow - API Server (UI em http://localhost:8080)
-  # No Airflow 3.x, 'api-server' substitui o antigo 'webserver'
+  # Airflow API (UI)
   # ============================================================
   airflow-api-server:
     build:
@@ -93,7 +94,7 @@ services:
     restart: always
 
   # ============================================================
-  # Airflow - Scheduler (executa as DAGs)
+  # Airflow Scheduler
   # ============================================================
   airflow-scheduler:
     build:
@@ -108,8 +109,22 @@ services:
     restart: always
 
   # ============================================================
-  # Metabase - Visualização (UI em http://localhost:3000)
-  # Já configurado com conexão ao PostgreSQL (schema gold)
+  # Airflow DAG Processor (ESSENCIAL no 3.x)
+  # ============================================================
+  airflow-dag-processor:
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    command: dag-processor
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+  # ============================================================
+  # Metabase
   # ============================================================
   metabase:
     image: metabase/metabase:latest
@@ -125,8 +140,7 @@ services:
     restart: always
 
   # ============================================================
-  # Metabase Setup - Configura admin + conexão PostgreSQL automaticamente
-  # Roda uma vez e para
+  # Metabase Setup
   # ============================================================
   metabase-setup:
     image: curlimages/curl:latest
@@ -145,21 +159,18 @@ services:
     command:
       - -c
       - |
-        echo "Aguardando Metabase inicializar..."
+        echo "Aguardando Metabase..."
         until curl -sf http://metabase:3000/api/health | grep -q "ok"; do
           sleep 5
-          echo "  ...aguardando Metabase..."
         done
-        echo "Metabase pronto! Verificando se já foi configurado..."
 
         SETUP_TOKEN=$$(curl -sf http://metabase:3000/api/session/properties | grep -o '"setup-token":"[^"]*"' | cut -d'"' -f4)
 
         if [ -z "$$SETUP_TOKEN" ]; then
-          echo "Metabase já configurado anteriormente. Pulando setup."
+          echo "Metabase já configurado."
           exit 0
         fi
 
-        echo "1/2 - Criando usuário admin..."
         curl -sf -X POST http://metabase:3000/api/setup \
           -H "Content-Type: application/json" \
           -d "{
@@ -169,39 +180,8 @@ services:
               \"last_name\": \"OMDB\",
               \"email\": \"$$METABASE_USER\",
               \"password\": \"$$METABASE_PASSWORD\"
-            },
-            \"prefs\": {
-              \"site_name\": \"OMDB - Grupo 7\"
             }
           }" > /dev/null
-
-        echo "2/2 - Adicionando conexão PostgreSQL (schema gold)..."
-        SESSION=$$(curl -sf -X POST http://metabase:3000/api/session \
-          -H "Content-Type: application/json" \
-          -d "{\"username\": \"$$METABASE_USER\", \"password\": \"$$METABASE_PASSWORD\"}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
-
-        curl -sf -X POST http://metabase:3000/api/database \
-          -H "Content-Type: application/json" \
-          -H "X-Metabase-Session: $$SESSION" \
-          -d "{
-            \"engine\": \"postgres\",
-            \"name\": \"OMDB Gold\",
-            \"details\": {
-              \"host\": \"$$POSTGRES_HOST\",
-              \"port\": $$POSTGRES_PORT,
-              \"dbname\": \"$$POSTGRES_DB\",
-              \"user\": \"$$POSTGRES_USER\",
-              \"password\": \"$$POSTGRES_PASSWORD\",
-              \"schema-filters-type\": \"inclusion\",
-              \"schema-filters-patterns\": \"gold\"
-            }
-          }" > /dev/null
-
-        echo ""
-        echo "=== Metabase configurado! ==="
-        echo "  URL: http://localhost:3000"
-        echo "  Login: $$METABASE_USER / $$METABASE_PASSWORD"
-        echo "  Banco: OMDB Gold (schema gold)"
 
 volumes:
   postgres_data:
