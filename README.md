@@ -316,10 +316,6 @@ Exemplos:
 Dashboards em construção
 
 
-## Desafios Encontrados
-
-Em construção
-
 ## Vídeo de apresentação
 
 Inserir link vídeo
