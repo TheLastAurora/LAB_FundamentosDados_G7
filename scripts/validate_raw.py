@@ -19,7 +19,7 @@ context = gx.get_context()
 datasource_name = "postgres_datasource"
 
 if datasource_name not in [ds["name"] for ds in context.list_datasources()]:
-    context.sources.add_sqlalchemy(
+    context.sources.add_postgres(
         name=datasource_name,
         connection_string=connection_string,
     )
