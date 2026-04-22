@@ -1,70 +1,75 @@
 import great_expectations as gx
-from sqlalchemy import create_engine
 
 # ==========================================
-# Conexão com Postgres (Docker network)
+# Configuração
 # ==========================================
 connection_string = "postgresql+psycopg2://postgres:postgres@postgres:5432/airflow"
-
-engine = create_engine(connection_string)
+datasource_name = "postgres_datasource"
+schema_name = "raw"
+table_name = "artists"
+suite_name = "artists_suite"
 
 # ==========================================
-# Inicializa contexto GE
+# Inicializa contexto
 # ==========================================
 context = gx.get_context()
 
 # ==========================================
-# Cria datasource (se não existir)
+# Cria ou atualiza datasource
 # ==========================================
-datasource_name = "postgres_datasource"
-
-if datasource_name not in [ds["name"] for ds in context.list_datasources()]:
-    context.sources.add_sqlalchemy(
-        name=datasource_name,
-        connection_string=connection_string,
-    )
-
-# ==========================================
-# Cria asset (tabela raw.artists como exemplo)
-# ==========================================
-table_name = "artists"
-
-asset = context.sources.get(datasource_name).add_table_asset(
-    name=table_name,
-    table_name=table_name,
-    schema_name="raw",
+datasource = context.sources.add_or_update_postgres(
+    name=datasource_name,
+    connection_string=connection_string,
 )
 
 # ==========================================
-# Batch request
+# Cria asset
+# ==========================================
+asset = datasource.add_table_asset(
+    name=table_name,
+    table_name=table_name,
+    schema_name=schema_name,
+)
+
+# ==========================================
+# Cria suite SE não existir
+# ==========================================
+try:
+    context.get_expectation_suite(suite_name)
+except Exception:
+    context.add_expectation_suite(expectation_suite_name=suite_name)
+
+# ==========================================
+# Batch
 # ==========================================
 batch_request = asset.build_batch_request()
 
+# ==========================================
+# Validator (AGORA CORRETO)
+# ==========================================
 validator = context.get_validator(
     batch_request=batch_request,
-    expectation_suite_name="artists_suite",
+    expectation_suite_name=suite_name,
 )
 
 # ==========================================
-# Expectations básicas
+# Expectations
 # ==========================================
 validator.expect_table_row_count_to_be_between(min_value=1)
-
 validator.expect_column_values_to_not_be_null("id")
-
 validator.expect_column_values_to_be_unique("id")
 
 # ==========================================
-# Salva suite
+# Salva
 # ==========================================
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # ==========================================
-# Roda validação
+# Executa validação
 # ==========================================
 results = validator.validate()
 
 if not results["success"]:
-    raise Exception("Validação falhou!")
+    raise Exception("Validação GE falhou!")
 
-print("Validação GE executada com sucesso!")
+print("✅ Validação GE executada com sucesso!")
