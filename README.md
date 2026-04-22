@@ -96,7 +96,115 @@ Caso precise reconfigurar manualmente:
   
 ## Great Expectations
 
-Em construção
+A qualidade dos dados neste projeto é garantida utilizando **Great Expectations (GE)**, integrado diretamente ao pipeline orquestrado pelo Airflow.
+
+---
+
+### Objetivo
+
+As validações são aplicadas na camada **RAW**, logo após a ingestão dos dados, com o objetivo de:
+
+- Detectar inconsistências o mais cedo possível  
+- Evitar propagação de erros para as camadas analíticas (Silver e Gold)  
+- Garantir confiabilidade nas análises finais no Metabase  
+
+---
+
+### Implementação
+
+A validação é executada automaticamente pela DAG do Airflow na etapa:
+
+```
+validate_raw
+```
+
+Essa etapa chama o script:
+
+```
+scripts/validate_raw.py
+```
+
+O script utiliza Great Expectations para:
+
+1. Conectar ao banco PostgreSQL  
+2. Acessar a tabela `raw.artists`  
+3. Definir regras de qualidade (expectations)  
+4. Executar a validação  
+5. Interromper o pipeline em caso de falha  
+
+---
+
+### Regras de Validação (Expectation Suite)
+
+Atualmente, as seguintes validações são aplicadas à tabela `raw.artists`:
+
+- **Tabela não vazia**  
+  Garante que o processo de ingestão carregou dados corretamente  
+
+```python
+validator.expect_table_row_count_to_be_between(min_value=1)
+```
+
+- **Campo `id` obrigatório (NOT NULL)**  
+  Evita registros inválidos sem identificação  
+
+```python
+validator.expect_column_values_to_not_be_null("id")
+```
+
+- **Campo `id` único**  
+  Garante integridade e ausência de duplicidade  
+
+```python
+validator.expect_column_values_to_be_unique("id")
+```
+
+---
+
+### Tratamento de Falhas
+
+Caso alguma validação falhe:
+
+- O Great Expectations retorna erro  
+- A task `validate_raw` falha no Airflow  
+- O pipeline é interrompido automaticamente  
+
+Isso impede que dados inconsistentes avancem para as etapas de transformação (dbt).
+
+---
+
+### Integração com o Pipeline
+
+Fluxo completo:
+
+```
+Extract → RAW → [Great Expectations] → dbt (Silver → Gold) → Metabase
+```
+
+---
+
+### Escalabilidade
+
+A arquitetura permite expansão simples das validações:
+
+- Inclusão de novas tabelas como assets  
+- Criação de novas regras de validação  
+- Evolução para uso de checkpoints e Data Docs  
+
+---
+
+### Boas práticas aplicadas
+
+- Validação na origem (data quality shift-left)  
+- Separação entre ingestão, validação e transformação  
+- Fail fast: pipeline interrompido em caso de erro  
+- Estrutura preparada para evolução  
+
+---
+
+### Observação
+
+Os arquivos de backup (`.tar`) não são versionados no repositório devido ao tamanho, sendo disponibilizados separadamente.
 
 ## DBT
 
