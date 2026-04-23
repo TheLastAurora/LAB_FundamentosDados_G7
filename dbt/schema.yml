@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: dim_artists
+    description: "Dimensão de artistas com atributos descritivos e métricas consolidadas de relevância."
+    columns:
+      - name: artist_id
+        description: "Identificador único do artista."
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_albums
+    description: "Dimensão de álbuns utilizada para análises de catálogo e recorrência de lançamentos."
+    columns:
+      - name: album_id
+        description: "Identificador único do álbum."
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_tracks
+    description: "Fato principal contendo métricas de desempenho das músicas e relacionamento com artistas e álbuns."
+    columns:
+      - name: track_id
+        description: "Identificador único da faixa."
+        tests:
+          - not_null
+          - unique
+
+      - name: artist_id
+        description: "Chave de relacionamento com a dimensão de artistas."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_artists')
+              field: artist_id
+
+      - name: album_id
+        description: "Chave de relacionamento com a dimensão de álbuns."
+        tests:
+          - relationships:
+              to: ref('dim_albums')
+              field: album_id
