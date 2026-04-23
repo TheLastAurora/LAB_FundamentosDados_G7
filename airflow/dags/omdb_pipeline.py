@@ -79,7 +79,7 @@ with DAG(
     # ----------------------------------------------------------
     validate_raw = BashOperator(
         task_id="validate_raw",
-        bash_command="echo 'Validação pulada temporariamente'",
+        bash_command="python /opt/airflow/scripts/validate_raw.py",
     )
 
     # ----------------------------------------------------------
