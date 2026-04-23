@@ -310,6 +310,13 @@ Exemplos:
 - `fact_tracks.artist_id` deve existir em `dim_artists.artist_id`
 - `fact_tracks.album_id` deve existir em `dim_albums.album_id`
 
+Documentação técnica gerada automaticamente
+
+```
+dbt docs generate
+dbt docs serve 
+```
+
 
 ## Dashboards Metabase
 
