@@ -247,13 +247,13 @@ A proposta é transformar o modelo relacional da base em uma estrutura mais adeq
 
 A camada Gold foi estruturada no conceito de **Data Marts**, organizando os dados por assunto de negócio.
 
-#### `gold.dim_artists`
+#### `dbt\models\marts\gold.dim_artists`
 Dimensão de artistas, utilizada para análises de relevância, popularidade, crescimento de inscritos e comparação entre artistas emergentes e consolidados.
 
-#### `gold.dim_albums`
+#### `dbt\models\marts\gold.dim_albums`
 Dimensão de álbuns, útil para analisar recorrência de lançamentos, relação entre projetos e impacto de álbuns na performance das faixas.
 
-#### `gold.fact_tracks`
+#### `dbt\models\marts\gold.fact_tracks`
 Fato principal do projeto, reunindo métricas de desempenho das músicas, como volume de visualizações/playbacks, características do conteúdo e relacionamento com artistas e álbuns. Essa tabela é a base para responder às perguntas estratégicas do storytelling. :contentReference[oaicite:4]{index=4}
 
 Essa modelagem permite separar:
