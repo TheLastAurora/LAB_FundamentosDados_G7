@@ -347,6 +347,13 @@ dbt docs generate
 dbt docs serve 
 ```
 
+   ### 5. Desafios Encontrados no DBT
+
+- Integridade dos dados: Garantir consistência entre fact_tracks e dimensões (dim_artists, dim_albums) evitando duplicidades e chaves inválidas.
+- Relacionamento muitos-para-muitos (features): Tratar músicas com múltiplos artistas sem inflar métricas como views ou gerar duplicação de registros.
+- Centralização da lógica de negócio: Evitar divergência de métricas entre dbt e BI, consolidando regras diretamente na camada Gold.
+- Limitação de dados temporais: Ausência de histórico detalhado dificultando análises como decay de playback e evolução ao longo do tempo.
+
 
 ## Dashboards Metabase
 
