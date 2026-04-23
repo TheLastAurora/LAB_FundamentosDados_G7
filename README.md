@@ -231,6 +231,30 @@ As principais tabelas analíticas consumidas no BI são:
 
 ---
 
+### 1. Instalação / Configuração do DBT
+
+- Instação do DBT (Postgres)
+
+```
+pip install dbt-postgres
+```
+
+- Inicialização do Projeto
+
+```
+dbt init dbt_labdb
+```
+
+- Configuração da conexão
+
+→ arquivo >> `dbt\models\profiles.yml`
+
+
+2.4 Definição do Source (Camada Gold)
+
+→ arquivo >> `dbt\models\marts\marts.yml`
+→ schema  >> `dbt\schema.yml`
+
 ### 1. Visão Geral dos Dados
 
 Na camada Gold, os dados deixam de representar somente entidades técnicas e passam a refletir uma visão de negócio voltada para marketing musical e performance em streaming.
@@ -284,7 +308,7 @@ Essa abordagem também facilita a evolução futura para métricas padronizadas,
 
 ---
 
-### Testes no dbt
+### 4. Testes no dbt
 
 Para aumentar a confiabilidade da camada Gold, foram definidos testes de integridade e qualidade diretamente nos modelos dbt.
 
