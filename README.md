@@ -214,6 +214,9 @@ Os arquivos de backup (`.tar`) não são versionados no repositório devido ao t
 A camada Gold foi desenvolvida com **dbt (data build tool)** para transformar dados brutos e tratados em modelos analíticos orientados ao negócio.  
 Neste projeto, o dbt é responsável por consolidar a camada analítica que responde às perguntas centrais da agência de mídia musical, com foco em performance de artistas, decay de playback, impacto de features e efetividade de conteúdo explícito.
 
+O pipeline já integra o dbt via Airflow nas etapas `dbt_deps`, `dbt_run` e `dbt_test`, garantindo execução automatizada das dependências, transformações e testes de qualidade. :contentReference[oaicite:1]{index=1}
+
+
 ### Objetivo da Camada Gold
 
 A camada Gold tem como finalidade:
@@ -250,12 +253,12 @@ dbt init dbt_labdb
 → arquivo >> `dbt\models\profiles.yml`
 
 
-2.4 Definição do Source (Camada Gold)
+- Definição do Source (Camada Gold)
 
 → arquivo >> `dbt\models\marts\marts.yml`
 → schema  >> `dbt\schema.yml`
 
-### 1. Visão Geral dos Dados
+### 2. Visão Geral dos Dados
 
 Na camada Gold, os dados deixam de representar somente entidades técnicas e passam a refletir uma visão de negócio voltada para marketing musical e performance em streaming.
 
@@ -270,7 +273,7 @@ A proposta é transformar o modelo relacional da base em uma estrutura mais adeq
 
 ---
 
-### 2. Criação de Data Marts
+### 3. Criação de Data Marts
 
 A camada Gold foi estruturada no conceito de **Data Marts**, organizando os dados por assunto de negócio.
 
@@ -291,7 +294,7 @@ Essa modelagem permite separar:
 
 ---
 
-### 3. Melhoria na Abstração
+### 4. Melhoria na Abstração
 
 Um dos principais ganhos do uso do dbt neste projeto é a melhoria na abstração analítica.
 
@@ -308,7 +311,7 @@ Essa abordagem também facilita a evolução futura para métricas padronizadas,
 
 ---
 
-### 4. Testes no dbt
+   ### 5. Testes no DBT
 
 Para aumentar a confiabilidade da camada Gold, foram definidos testes de integridade e qualidade diretamente nos modelos dbt.
 
@@ -349,10 +352,6 @@ dbt docs serve
 
 Dashboards em construção
 
-
-## Vídeo de apresentação
-
-Inserir link vídeo
 
 
 ## Papéis e Responsabilidades
