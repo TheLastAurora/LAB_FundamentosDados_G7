@@ -407,13 +407,13 @@ docker restart lab_fundamentosdados_g7-metabase-1
 
 ## Papéis e Responsabilidades
 
-| Integrante                   | Perfil Git      | Papel / Reponsabilidade Projeto |
-|--------------------------|----------|----------|
-| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)  | Documentação / Apresentação / Dashboards / Transformação Gold Layer (DBT) |
-| Igor Graseffi            | [@Graseffi](https://github.com/Graseffi)   | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard / Qualidade de Dados (Great Expectations) |
-| João Armandes             | Em construção  | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard / Visualização (Metabase) |
-| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard / Extração & Carga (Python EL) |
-| Victor Lira            | [@VicLira](https://github.com/VicLira)  | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Orquestração (Airflow) |
+| Integrante                   | Perfil Git                                         | Papel / Reponsabilidade Projeto |
+|--------------------------|----------------------------------------------------|----------|
+| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)       | Documentação / Apresentação / Dashboards / Transformação Gold Layer (DBT) |
+| Igor Graseffi            | [@Graseffi](https://github.com/Graseffi)           | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard / Qualidade de Dados (Great Expectations) |
+| João Armandes             | [@armandes-ctrl](https://github.com/armandes-ctrl) | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard / Visualização (Metabase) |
+| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora) | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard / Extração & Carga (Python EL) |
+| Victor Lira            | [@VicLira](https://github.com/VicLira)             | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Orquestração (Airflow) |
 
 
 ## Material de Apresentação
