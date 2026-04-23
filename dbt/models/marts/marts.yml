@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: dim_artists
+    description: "Dimensão de artistas com métricas de relevância e performance."
+    columns:
+      - name: artist_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_albums
+    description: "Dimensão de álbuns com métricas consolidadas de desempenho."
+    columns:
+      - name: album_id
+        tests:
+          - not_null
+          - unique
+
+  - name: fact_tracks
+    description: "Fato principal com métricas das faixas para análise de performance musical."
+    columns:
+      - name: track_id
+        tests:
+          - not_null
+          - unique
+
+      - name: album_id
+        tests:
+          - relationships:
+              to: ref('dim_albums')
+              field: album_id
