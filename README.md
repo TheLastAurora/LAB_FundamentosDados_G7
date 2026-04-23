@@ -54,13 +54,16 @@ Principais questionamentos (problema de negócio):
 # 1. Clone o repositório
 git clone <repo-url> && cd LAB_FundamentosDados_G7
 
-# 2. Copie o arquivo de variáveis de ambiente
+# 2. Instalar .tar na pasta /backups
+https://drive.google.com/file/d/1u0mfiLXVVsxLqtPZQQEDYUSoQxfiewB-/view?usp=sharing
+
+# 3. Copie o arquivo de variáveis de ambiente
 cp .env.example .env
 
-# 3. Suba todos os serviços
+# 4. Suba todos os serviços
 docker compose up -d --build
 
-# 4. Aguarde os containers ficarem healthy
+# 5. Aguarde os containers ficarem healthy
 docker compose ps
 ```
 
