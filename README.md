@@ -284,7 +284,7 @@ Dimensão de artistas, utilizada para análises de relevância, popularidade, cr
 Dimensão de álbuns, útil para analisar recorrência de lançamentos, relação entre projetos e impacto de álbuns na performance das faixas.
 
 #### `dbt\models\marts\gold.fact_tracks`
-Fato principal do projeto, reunindo métricas de desempenho das músicas, como volume de visualizações/playbacks, características do conteúdo e relacionamento com artistas e álbuns. Essa tabela é a base para responder às perguntas estratégicas do storytelling. :contentReference[oaicite:4]{index=4}
+Fato principal do projeto, reunindo métricas de desempenho das músicas, como volume de visualizações/playbacks, características do conteúdo e relacionamento com artistas e álbuns. Essa tabela é a base para responder às perguntas estratégicas do storytelling.
 
 Essa modelagem permite separar:
 
@@ -315,12 +315,12 @@ Essa abordagem também facilita a evolução futura para métricas padronizadas,
 
 Para aumentar a confiabilidade da camada Gold, foram definidos testes de integridade e qualidade diretamente nos modelos dbt.
 
-Os testes aplicados seguem três pilares:
+- Os testes aplicados seguem três pilares:
 
 #### `not_null`
 Garante que colunas críticas não contenham valores nulos.
 
-Exemplos:
+Sendo:
 - `artist_id` em `dim_artists`
 - `album_id` em `dim_albums`
 - `track_id`, `artist_id` e `album_id` em `fact_tracks`
@@ -328,7 +328,7 @@ Exemplos:
 #### `unique`
 Garante unicidade em chaves de negócio ou chaves substitutas.
 
-Exemplos:
+Sendo:
 - `artist_id` em `dim_artists`
 - `album_id` em `dim_albums`
 - `track_id` em `fact_tracks`
@@ -336,11 +336,11 @@ Exemplos:
 #### `relationships`
 Garante integridade referencial entre fato e dimensões.
 
-Exemplos:
+Sendo:
 - `fact_tracks.artist_id` deve existir em `dim_artists.artist_id`
 - `fact_tracks.album_id` deve existir em `dim_albums.album_id`
 
-Documentação técnica gerada automaticamente
+- Documentação técnica gerada automaticamente
 
 ```
 dbt docs generate
@@ -349,10 +349,10 @@ dbt docs serve
 
    ### 5. Desafios Encontrados no DBT
 
-- Integridade dos dados: Garantir consistência entre fact_tracks e dimensões (dim_artists, dim_albums) evitando duplicidades e chaves inválidas.
-- Relacionamento muitos-para-muitos (features): Tratar músicas com múltiplos artistas sem inflar métricas como views ou gerar duplicação de registros.
-- Centralização da lógica de negócio: Evitar divergência de métricas entre dbt e BI, consolidando regras diretamente na camada Gold.
-- Limitação de dados temporais: Ausência de histórico detalhado dificultando análises como decay de playback e evolução ao longo do tempo.
+- *Integridade dos dados*: Garantir consistência entre fact_tracks e dimensões (dim_artists, dim_albums) evitando duplicidades e chaves inválidas.
+- *Relacionamento muitos-para-muitos (features)*: Tratar músicas com múltiplos artistas sem inflar métricas como views ou gerar duplicação de registros.
+- *Centralização da lógica de negócio*: Evitar divergência de métricas entre dbt e BI, consolidando regras diretamente na camada Gold.
+- *Limitação de dados temporais*: Ausência de histórico detalhado dificultando análises como decay de playback e evolução ao longo do tempo.
 
 
 ## Dashboards Metabase
