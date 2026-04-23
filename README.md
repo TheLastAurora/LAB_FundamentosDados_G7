@@ -214,7 +214,7 @@ Os arquivos de backup (`.tar`) não são versionados no repositório devido ao t
 A camada Gold foi desenvolvida com **dbt (data build tool)** para transformar dados brutos e tratados em modelos analíticos orientados ao negócio.  
 Neste projeto, o dbt é responsável por consolidar a camada analítica que responde às perguntas centrais da agência de mídia musical, com foco em performance de artistas, decay de playback, impacto de features e efetividade de conteúdo explícito.
 
-O pipeline já integra o dbt via Airflow nas etapas `dbt_deps`, `dbt_run` e `dbt_test`, garantindo execução automatizada das dependências, transformações e testes de qualidade. :contentReference[oaicite:1]{index=1}
+O pipeline já integra o dbt via Airflow nas etapas `dbt_deps`, `dbt_run` e `dbt_test`, garantindo execução automatizada das dependências, transformações e testes de qualidade.
 
 
 ### Objetivo da Camada Gold
@@ -256,6 +256,7 @@ dbt init dbt_labdb
 - Definição do Source (Camada Gold)
 
 → arquivo >> `dbt\models\marts\marts.yml`
+
 → schema  >> `dbt\schema.yml`
 
 ### 2. Visão Geral dos Dados
@@ -340,7 +341,8 @@ Sendo:
 - `fact_tracks.artist_id` deve existir em `dim_artists.artist_id`
 - `fact_tracks.album_id` deve existir em `dim_albums.album_id`
 
-- Documentação técnica gerada automaticamente
+
+Documentação técnica gerada automaticamente
 
 ```
 dbt docs generate
