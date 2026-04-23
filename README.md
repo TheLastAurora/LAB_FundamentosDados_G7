@@ -30,6 +30,10 @@ Principais questionamentos (problema de negócio):
 
 ![Storytelling](Images/Storytelling_G7.png)
 
+## Configurações realizadas
+
+- DBT
+- Great Expectatios
 
 ## Diagrama arquitetura
 
@@ -52,18 +56,15 @@ Principais questionamentos (problema de negócio):
 
 ```bash
 # 1. Clone o repositório
-git clone <repo-url> && cd LAB_FundamentosDados_G7
+git clone https://github.com/TheLastAurora/LAB_FundamentosDados_G7 && cd LAB_FundamentosDados_G7
 
-# 2. Instalar .tar na pasta /backups
-https://drive.google.com/file/d/1u0mfiLXVVsxLqtPZQQEDYUSoQxfiewB-/view?usp=sharing
-
-# 3. Copie o arquivo de variáveis de ambiente
+# 2. Copie o arquivo de variáveis de ambiente
 cp .env.example .env
 
-# 4. Suba todos os serviços
+# 3. Suba todos os serviços
 docker compose up -d --build
 
-# 5. Aguarde os containers ficarem healthy
+# 4. Aguarde os containers ficarem healthy
 docker compose ps
 ```
 
@@ -97,281 +98,52 @@ Caso precise reconfigurar manualmente:
    - Host: `postgres`, Porta: `5432`, DB: `omdb`, User: `postgres`, Pass: `postgres`
 3. Crie dashboards a partir das tabelas `gold.dim_artists`, `gold.dim_albums`, `gold.fact_tracks`
   
-## Great Expectations
 
-A qualidade dos dados neste projeto é garantida utilizando **Great Expectations (GE)**, integrado diretamente ao pipeline orquestrado pelo Airflow.
+## Vídeo de apresentação
 
----
+Inserir link vídeo
 
-### Objetivo
+## Dashboards
 
-As validações são aplicadas na camada **RAW**, logo após a ingestão dos dados, com o objetivo de:
+Inserir dashboards
 
-- Detectar inconsistências o mais cedo possível  
-- Evitar propagação de erros para as camadas analíticas (Silver e Gold)  
-- Garantir confiabilidade nas análises finais no Metabase  
+## Desafios Encontrados
 
----
+Inserir desafio
 
-### Implementação
+## Papéis e Responsabilidades
 
-A validação é executada automaticamente pela DAG do Airflow na etapa:
+Incluir tabela participantes do grupo (com papéis e responsabilidades)
 
-```
-validate_raw
-```
+## Material de Apresentação
 
-Essa etapa chama o script:
+Incluir PPT Apresentação do Projeto
 
-```
-scripts/validate_raw.py
-```
+## Glossário
 
-O script utiliza Great Expectations para:
+Inserir glossário
+Em construção
 
-1. Conectar ao banco PostgreSQL  
-2. Acessar a tabela `raw.artists`  
-3. Definir regras de qualidade (expectations)  
-4. Executar a validação  
-5. Interromper o pipeline em caso de falha  
 
----
-
-### Regras de Validação (Expectation Suite)
-
-Atualmente, as seguintes validações são aplicadas à tabela `raw.artists`:
-
-- **Tabela não vazia**  
-  Garante que o processo de ingestão carregou dados corretamente  
-
-```python
-validator.expect_table_row_count_to_be_between(min_value=1)
-```
-
-- **Campo `id` obrigatório (NOT NULL)**  
-  Evita registros inválidos sem identificação  
-
-```python
-validator.expect_column_values_to_not_be_null("id")
-```
-
-- **Campo `id` único**  
-  Garante integridade e ausência de duplicidade  
-
-```python
-validator.expect_column_values_to_be_unique("id")
-```
-
----
-
-### Tratamento de Falhas
-
-Caso alguma validação falhe:
-
-- O Great Expectations retorna erro  
-- A task `validate_raw` falha no Airflow  
-- O pipeline é interrompido automaticamente  
-
-Isso impede que dados inconsistentes avancem para as etapas de transformação (dbt).
-
----
-
-### Integração com o Pipeline
-
-Fluxo completo:
-
-```
-Extract → RAW → [Great Expectations] → dbt (Silver → Gold) → Metabase
-```
-
----
-
-### Escalabilidade
-
-A arquitetura permite expansão simples das validações:
-
-- Inclusão de novas tabelas como assets  
-- Criação de novas regras de validação  
-- Evolução para uso de checkpoints e Data Docs  
-
----
-
-### Boas práticas aplicadas
-
-- Validação na origem (data quality shift-left)  
-- Separação entre ingestão, validação e transformação  
-- Fail fast: pipeline interrompido em caso de erro  
-- Estrutura preparada para evolução  
-
----
-
-### Observação
-
-Os arquivos de backup (`.tar`) não são versionados no repositório devido ao tamanho, sendo disponibilizados separadamente.
-
-## DBT
-
-A camada Gold foi desenvolvida com **dbt (data build tool)** para transformar dados brutos e tratados em modelos analíticos orientados ao negócio.  
-Neste projeto, o dbt é responsável por consolidar a camada analítica que responde às perguntas centrais da agência de mídia musical, com foco em performance de artistas, decay de playback, impacto de features e efetividade de conteúdo explícito.
-
-O pipeline já integra o dbt via Airflow nas etapas `dbt_deps`, `dbt_run` e `dbt_test`, garantindo execução automatizada das dependências, transformações e testes de qualidade.
-
-
-### Objetivo da Camada Gold
-
-A camada Gold tem como finalidade:
-
-- disponibilizar tabelas analíticas prontas para consumo no Metabase;
-- padronizar métricas de negócio;
-- abstrair regras analíticas complexas em modelos reutilizáveis;
-- aumentar a confiança dos dashboards por meio de testes e documentação.
-
-As principais tabelas analíticas consumidas no BI são:
-
-- `gold.dim_artists`
-- `gold.dim_albums`
-- `gold.fact_tracks`
-
----
-
-### 1. Instalação / Configuração do DBT
-
-- Instação do DBT (Postgres)
-
-```
-pip install dbt-postgres
-```
-
-- Inicialização do Projeto
-
-```
-dbt init dbt_labdb
-```
-
-- Configuração da conexão
-
-→ arquivo >> `dbt\models\profiles.yml`
-
-
-- Definição do Source (Camada Gold)
-
-→ arquivo >> `dbt\models\marts\marts.yml`
-
-→ schema  >> `dbt\schema.yml`
-
-### 2. Visão Geral dos Dados
-
-Na camada Gold, os dados deixam de representar somente entidades técnicas e passam a refletir uma visão de negócio voltada para marketing musical e performance em streaming.
-
-Essa camada permite analisar, por exemplo:
-
-- o decay médio de playback por tipo de conteúdo ao longo de 12 semanas;
-- a permanência ou ascensão de artistas e músicas ao longo de 2024;
-- o impacto de combinações de features no crescimento de inscritos;
-- o comportamento do conteúdo explícito conforme a base de inscritos evolui. 
-
-A proposta é transformar o modelo relacional da base em uma estrutura mais adequada para exploração analítica, com fatos e dimensões que simplificam o consumo por dashboards e relatórios executivos.
-
----
-
-### 3. Criação de Data Marts
-
-A camada Gold foi estruturada no conceito de **Data Marts**, organizando os dados por assunto de negócio.
-
-#### `dbt\models\marts\gold.dim_artists`
-Dimensão de artistas, utilizada para análises de relevância, popularidade, crescimento de inscritos e comparação entre artistas emergentes e consolidados.
-
-#### `dbt\models\marts\gold.dim_albums`
-Dimensão de álbuns, útil para analisar recorrência de lançamentos, relação entre projetos e impacto de álbuns na performance das faixas.
-
-#### `dbt\models\marts\gold.fact_tracks`
-Fato principal do projeto, reunindo métricas de desempenho das músicas, como volume de visualizações/playbacks, características do conteúdo e relacionamento com artistas e álbuns. Essa tabela é a base para responder às perguntas estratégicas do storytelling.
-
-Essa modelagem permite separar:
-
-- **dimensões**: entidades descritivas do negócio;
-- **fatos**: eventos e métricas quantitativas;
-- **regras analíticas**: lógica centralizada no dbt para reaproveitamento no Metabase.
-
----
-
-### 4. Melhoria na Abstração
-
-Um dos principais ganhos do uso do dbt neste projeto é a melhoria na abstração analítica.
-
-Em vez de depender de consultas complexas diretamente no BI, as regras de negócio são centralizadas em modelos versionados e testáveis. Isso reduz duplicidade de lógica, melhora a rastreabilidade e facilita manutenção do pipeline.
-
-Na prática, a camada Gold entrega:
-
-- nomenclatura mais próxima do negócio;
-- reaproveitamento de modelos analíticos;
-- separação clara entre ingestão, tratamento e consumo;
-- maior governança sobre métricas estratégicas.
-
-Essa abordagem também facilita a evolução futura para métricas padronizadas, documentação automatizada e maior escalabilidade analítica.
-
----
-
-   ### 5. Testes no DBT
-
-Para aumentar a confiabilidade da camada Gold, foram definidos testes de integridade e qualidade diretamente nos modelos dbt.
-
-- Os testes aplicados seguem três pilares:
-
-#### `not_null`
-Garante que colunas críticas não contenham valores nulos.
-
-Sendo:
-- `artist_id` em `dim_artists`
-- `album_id` em `dim_albums`
-- `track_id`, `artist_id` e `album_id` em `fact_tracks`
-
-#### `unique`
-Garante unicidade em chaves de negócio ou chaves substitutas.
-
-Sendo:
-- `artist_id` em `dim_artists`
-- `album_id` em `dim_albums`
-- `track_id` em `fact_tracks`
-
-#### `relationships`
-Garante integridade referencial entre fato e dimensões.
-
-Sendo:
-- `fact_tracks.artist_id` deve existir em `dim_artists.artist_id`
-- `fact_tracks.album_id` deve existir em `dim_albums.album_id`
-
-
-Documentação técnica gerada automaticamente
-
-```
-dbt docs generate
-dbt docs serve 
-```
-
-   ### 5. Desafios Encontrados no DBT
-
-- *Integridade dos dados*: Garantir consistência entre fact_tracks e dimensões (dim_artists, dim_albums) evitando duplicidades e chaves inválidas.
-- *Relacionamento muitos-para-muitos (features)*: Tratar músicas com múltiplos artistas sem inflar métricas como views ou gerar duplicação de registros.
-- *Centralização da lógica de negócio*: Evitar divergência de métricas entre dbt e BI, consolidando regras diretamente na camada Gold.
-- *Limitação de dados temporais*: Ausência de histórico detalhado dificultando análises como decay de playback e evolução ao longo do tempo.
-
-
-## Dashboards Metabase
+## Dashboards
 
 Dashboards em construção
 
+
+## Desafios Encontrados
+
+Em construção
 
 
 ## Papéis e Responsabilidades
 
 | Integrante                   | Perfil Git      | Papel / Reponsabilidade Projeto |
 |--------------------------|----------|----------|
-| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)  | Documentação / Apresentação / Dashboards / Transformação Gold Layer (DBT) |
-| Igor Graseffi            | [@Graseffi](https://github.com/Graseffi)   | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard / Qualidade de Dados (Great Expectations) |
-| João Armandes             | Em construção  | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard / Visualização (Metabase) |
-| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard / Extração & Carga (Python EL) |
-| Victor Lira            | [@VicLira](https://github.com/VicLira)  | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Orquestração (Airflow) |
+| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)  | Documentação / Apresentação / Dashboards |
+| Igor Graseffi            | Em construção  | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard |
+| João Armandes             | Em construção  | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard |
+| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard |
+| Victor Lira            | [@VicLira](https://github.com/VicLira)  | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Airflow |
 
 
 ## Material de Apresentação
