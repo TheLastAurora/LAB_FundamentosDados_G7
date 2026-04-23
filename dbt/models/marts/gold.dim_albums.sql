@@ -1,4 +1,4 @@
-ITH album_tracks AS (
+WITH album_tracks AS (
 
     SELECT
         album,

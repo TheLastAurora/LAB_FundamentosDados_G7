@@ -359,19 +359,61 @@ dbt docs serve
 
 ## Dashboards Metabase
 
-Dashboards em construção
+Os dashboards foram desenvolvidos no Metabase conectado ao schema `raw` do PostgreSQL,
+respondendo às perguntas de negócio definidas no storytelling da agência de mídia musical.
+
+### Dashboard 1 - Visão Geral de Mídias e Artistas
+
+![Metabase1](Images/metabase1.png)
+
+- **Tipos de mídia mais ouvidas no ano**: distribuição dos conteúdos mais consumidos ao longo do período analisado
+- **Quantidade de artistas registrados por ano**: evolução do número de artistas cadastrados na base
+
+### Dashboard 2 - Performance e Conteúdo
+
+![Metabase2](Images/metabase2.png)
+
+- **Quantidade de views por segundos de música**: relação entre a duração das faixas e o volume de visualizações
+- **Proporção de músicas explícitas vs. não explícitas**: distribuição do tipo de conteúdo no catálogo
+
+### Restaurar os Dashboards
+
+Caso precise reestabelecer os dashboards em um novo ambiente, o banco do Metabase
+está versionado em `metabase/metabase.db`. Para restaurar:
+
+```bash
+# 1. Suba o ambiente normalmente
+docker compose up -d --build
+
+# 2. Aguarde o Metabase inicializar e copie o banco salvo
+docker cp ./metabase/metabase.db lab_fundamentosdados_g7-metabase-1:/metabase-data/metabase.db
+
+# 3. Reinicie o Metabase
+docker restart lab_fundamentosdados_g7-metabase-1
+
+# 4. Acesse http://localhost:3000
+# Login: admin@omdb.local / Admin123!
+```
+
+### Desafios Encontrados
+
+- **Airflow pesado para o ambiente local**: O Airflow 3.x com múltiplos containers (api-server, scheduler, dag-processor) exigiu bastante recurso da máquina, causando lentidão durante a execução do pipeline, especialmente na etapa de extração com uma base de 11GB.
+
+- **Configuração do profiles.yml**: O arquivo de configuração do dbt não estava versionado no repositório, exigindo criação manual e ajuste do caminho correto para o Airflow encontrá-lo dentro do container.
+
+- **Line endings (CRLF vs LF)**: Scripts `.sh` commitados no Windows causaram falha na inicialização do PostgreSQL dentro do container Linux, exigindo conversão manual dos arquivos para LF.
 
 
 
 ## Papéis e Responsabilidades
 
-| Integrante                   | Perfil Git      | Papel / Reponsabilidade Projeto |
-|--------------------------|----------|----------|
-| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)  | Documentação / Apresentação / Dashboards / Transformação Gold Layer (DBT) |
-| Igor Graseffi            | [@Graseffi](https://github.com/Graseffi)   | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard / Qualidade de Dados (Great Expectations) |
-| João Armandes             | Em construção  | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard / Visualização (Metabase) |
-| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora)  | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard / Extração & Carga (Python EL) |
-| Victor Lira            | [@VicLira](https://github.com/VicLira)  | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Orquestração (Airflow) |
+| Integrante                   | Perfil Git                                         | Papel / Reponsabilidade Projeto |
+|--------------------------|----------------------------------------------------|----------|
+| Fernando Luiz            | [@flg29-data](https://github.com/flg29-data)       | Documentação / Apresentação / Dashboards / Transformação Gold Layer (DBT) |
+| Igor Graseffi            | [@Graseffi](https://github.com/Graseffi)           | Definição do Tema / Apresentação / Storytelling / Pipeline Dados / Dashboard / Qualidade de Dados (Great Expectations) |
+| João Armandes             | [@armandes-ctrl](https://github.com/armandes-ctrl) | Diagramas Arquitetura / Pipeline de Dados / Apresentação / Base de Dados / Dashboard / Visualização (Metabase) |
+| Vitor Ribeiro            | [@TheLastAurora](https://github.com/TheLastAurora) | Ingestão de Dados / Pipeline de Dados / Apresentação / Dashboard / Extração & Carga (Python EL) |
+| Victor Lira            | [@VicLira](https://github.com/VicLira)             | Documentação / Apresentação / Vídeo Apresentação / Infraestrutura, Docker e Orquestração (Airflow) |
 
 
 ## Material de Apresentação
